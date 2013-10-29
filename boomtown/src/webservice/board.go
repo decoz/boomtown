@@ -15,14 +15,13 @@ type Item struct {
 	content string
 	wcount	int
 	
-
 }
 
 
 type Board struct {	
 	lastId int
 	Contents map[int] *Item 
-	 
+	WImages map[int] []WebImage  
 }
 
 
@@ -35,18 +34,37 @@ func CreateBoard() *Board{
 
 func (board *Board) initboard(){
 	board.Contents = make(map[int] *Item)
+	board.WImages = make(map[int] []WebImage)
 	board.lastId = 0
 	
 } 
 
 
-func FieldsBy(r rune) bool{
-	switch r{
-		case '/'  : return true
-		default   : return false			
+
+func MakeFieldsByExcept(c,s,e rune) func(rune)bool {
+
+	state := true
+
+	return func(r rune)bool{		
+		if state {
+			switch r{
+				case c : return true
+				case s : state = false
+					return true
+				default: return false
+			} 
+		} else {
+			if r == e {
+				state = true 
+				return true 
+			} 		
+		}
+		return false		
 	}
 	
-}
+	
+} 
+	
 
 func (board Board) listPage(page,pagesize int) string {
 /* 	page 단위로 list 를 불러온다. 
@@ -114,7 +132,7 @@ func (board *Board) Request(key int,request []byte) [][]byte {
 	req := string(request)
 	//cmd := strings.TrimSpace(req)
 	cmd := ""
-	fields := strings.FieldsFunc(req,FieldsBy)
+	fields := strings.FieldsFunc(req,MakeFieldsByExcept('/','[',']'))
 		
 	
 	fcount := len(fields)
@@ -194,15 +212,6 @@ func (board *Board) Request(key int,request []byte) [][]byte {
 		result = "error:bad command"
 	}
 
-	/*
-	log.Println("board: result -" , result)
-	if result[0:1] == "%" { 
-		board.Broadcast([]byte(result[1:]))
-	} else { 
-		//rs.Out <- []byte(result)
-		rs.Ws.Write([]byte(result))
-	}
-	*/
 	
 	return [][]byte{[]byte(result)}
 }
