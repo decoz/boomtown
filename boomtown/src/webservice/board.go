@@ -1,9 +1,9 @@
-package webkernel
+package webservice
 
 import (
 	"log"
 	"strings"
-	"strconv"
+	"strconv"	
 	
 )
 
@@ -19,8 +19,7 @@ type Item struct {
 }
 
 
-type Board struct {
-	RsManager
+type Board struct {	
 	lastId int
 	Contents map[int] *Item 
 	 
@@ -37,18 +36,9 @@ func CreateBoard() *Board{
 func (board *Board) initboard(){
 	board.Contents = make(map[int] *Item)
 	board.lastId = 0
-	board.initrm()
+	
 } 
 
-func (board *Board) LinkRs(rs *RShell){
-	board.addNewRs(rs)
-	rs.SetKernel(board)
-}
-
-func (board *Board) UnLinkRs(key int){
-	
-	board.removeRs(key)
-}
 
 func FieldsBy(r rune) bool{
 	switch r{
@@ -119,9 +109,9 @@ func (board Board) getRecordString(key int) (string){
 } 
 
 
-func (board *Board) Require(req string, rs *RShell) string {
+func (board *Board) Request(key int,request []byte) [][]byte {
 	
-	
+	req := string(request)
 	//cmd := strings.TrimSpace(req)
 	cmd := ""
 	fields := strings.FieldsFunc(req,FieldsBy)
@@ -175,9 +165,12 @@ func (board *Board) Require(req string, rs *RShell) string {
 			result =  "error:bad number" 
 		} else {
 			result = board.ReadItem(key)
-			rs.Ws.Write([]byte(result))
-			result = "%cnt:" + strconv.Itoa(key) +
+			//rs.Ws.Write([]byte(result))
+			
+			result2 := "%cnt:" + strconv.Itoa(key) +
 				"/" + strconv.Itoa(board.Contents[key].wcount)
+			
+			return [][]byte{ []byte(result), []byte(result2) }
 		}
 	
 	case "write":
@@ -201,6 +194,7 @@ func (board *Board) Require(req string, rs *RShell) string {
 		result = "error:bad command"
 	}
 
+	/*
 	log.Println("board: result -" , result)
 	if result[0:1] == "%" { 
 		board.Broadcast([]byte(result[1:]))
@@ -208,9 +202,9 @@ func (board *Board) Require(req string, rs *RShell) string {
 		//rs.Out <- []byte(result)
 		rs.Ws.Write([]byte(result))
 	}
+	*/
 	
-	
-	return result
+	return [][]byte{[]byte(result)}
 }
 
 func (board Board) KernelInfo() string{
