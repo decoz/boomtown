@@ -4,6 +4,7 @@ import (
 	"log"
 	"strings"
 	"strconv"	
+	"encoding/base64"
 	
 )
 
@@ -21,7 +22,7 @@ type Item struct {
 type Board struct {	
 	lastId int
 	Contents map[int] *Item 
-	WImages map[int] []WebImage  
+	WImages map[int] []*WebImage  
 }
 
 
@@ -34,7 +35,7 @@ func CreateBoard() *Board{
 
 func (board *Board) initboard(){
 	board.Contents = make(map[int] *Item)
-	board.WImages = make(map[int] []WebImage)
+	board.WImages = make(map[int] []*WebImage)
 	board.lastId = 0
 	
 } 
@@ -195,8 +196,11 @@ func (board *Board) Request(key int,request []byte) [][]byte {
 		if fcount < 4 {
 			result = "error:not enough argument"		
 		}
-		
+		if fcount == 5 {
+			board.AddImage(fields[4])
+		}
 		result =  board.AddItem(fields[1],fields[2],fields[3])
+		
 	case "delete":
 		if fcount < 2 {
 			result =  "error:read need more argument"
@@ -233,13 +237,28 @@ func (board *Board) ReadItem( key int) string{
 	subj := item.subject 
 	content := item.content
 	cnt :=  strconv.Itoa(item.wcount)
+	
 	item.wcount += 1
 	log.Println(key, "th item count now:" , item.wcount)
 	
 	result := cmd + ":" + owner + "/" + subj + "/" + content + "/" + cnt
 	
-	return result
+	wilist,ok := board.WImages[key]
+	if ok {
+		var thumb_str = "["	
+		for i,wi := range(wilist) {
+			if i != 0 { thumb_str += "," } 
+			thumb_str += string(wi.GetThumbE64())		
+		}
+		thumb_str += "]"
 		
+		result += "/" + thumb_str		
+	}
+	
+
+		
+	return result
+		 
 }
 
 
@@ -270,6 +289,23 @@ func (board *Board) AddItem(isend,isubj,icont string )string{
 	return result
 
 }
+
+func (board *Board) AddImage(imgInput string){
+
+	ifields := strings.Split(imgInput,",")
+	
+	wilist := make([]*WebImage , len(ifields))
+	for i,imgstr := range(ifields){
+		buff := Decode(nil,[]byte(imgstr),base64.StdEncoding)
+		img,_ := ByteToImage(buff)
+		wilist[i] = CreateWebImage(img,"")
+	}
+	
+	board.WImages[board.lastId] = wilist	
+	log.Println("saved ",len(wilist)," images at " ,board.lastId) 
+
+}
+
 
 func (board *Board) DummyInit(){
 
