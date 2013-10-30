@@ -191,7 +191,11 @@ func (board *Board) Request(key int,request []byte) [][]byte {
 			
 			return [][]byte{ []byte(result), []byte(result2) }
 		}
-	
+	case "openimg": 
+		if fcount == 2 {			
+			result = board.ReadImage(fields[1])			
+		} else { result =  "error:read need more argument" } 
+		
 	case "write":
 		if fcount < 4 {
 			result = "error:not enough argument"		
@@ -241,8 +245,9 @@ func (board *Board) ReadItem( key int) string{
 	item.wcount += 1
 	log.Println(key, "th item count now:" , item.wcount)
 	
-	result := cmd + ":" + owner + "/" + subj + "/" + content + "/" + cnt
-	
+	result := cmd + ":" +  strconv.Itoa(key) + "/" + owner + "/" +
+		subj + "/" + content + "/" + cnt
+		
 	wilist,ok := board.WImages[key]
 	if ok {
 		var thumb_str = "["	
@@ -306,6 +311,28 @@ func (board *Board) AddImage(imgInput string){
 
 }
 
+func (board *Board) ReadImage(imgkey string) string {
+	arr := strings.Split(imgkey,"-")
+	
+	rkeys := arr[0]
+	ikeys := arr[1]
+	rkey,_ := strconv.Atoi(rkeys)
+	ikey,_ := strconv.Atoi(ikeys)
+	
+	result := ""
+	
+	wlist,ok := board.WImages[rkey]
+	if ok {
+		wi := wlist[ikey]
+		if ok {
+			result = "image:"+imgkey+"/[" + string(wi.GetE64()) + "]"		
+		}
+	}
+	
+	log.Println("openimg:" + result)
+
+	return result
+}
 
 func (board *Board) DummyInit(){
 
