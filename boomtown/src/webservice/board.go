@@ -18,11 +18,24 @@ type Item struct {
 	
 }
 
+type Comment struct {		
+	owner	string
+	cmt  	string	
+}
+
+type Client struct {
+	cur_view 	int
+	cur_page  	int
+	cur_psize 	int 
+	id 			string		
+}
 
 type Board struct {	
 	lastId int
 	Contents map[int] *Item 
-	WImages map[int] []*WebImage  
+	WImages map[int] []*WebImage
+	Comments map[int] []*Comment  
+	Clients	map[int] *Client	
 }
 
 
@@ -36,6 +49,8 @@ func CreateBoard() *Board{
 func (board *Board) initboard(){
 	board.Contents = make(map[int] *Item)
 	board.WImages = make(map[int] []*WebImage)
+	board.Comments = make(map[int] []*Comment)
+	board.Clients = make(map[int] *Client)
 	board.lastId = 0
 	
 } 
@@ -128,8 +143,15 @@ func (board Board) getRecordString(key int) (string){
 } 
 
 
-func (board *Board) Request(key int,request []byte) [][]byte {
+func (board *Board) Request(cnum int,request []byte) [][]byte {
 	
+	
+	if _,ok := board.Clients[cnum];!ok{
+		board.Clients[cnum] = &Client{-1,-1,-1,""}			
+	} 
+	
+	client := board.Clients[cnum]
+		
 	req := string(request)
 	//cmd := strings.TrimSpace(req)
 	cmd := ""
@@ -167,6 +189,8 @@ func (board *Board) Request(key int,request []byte) [][]byte {
 		if err!=nil { 
 			result = "error:bad format of list" 
 		} else {
+			client.cur_page = page
+			client.cur_psize = pagesize 
 			result = "list:" + board.listPage(page,pagesize)
 		}	
 		
@@ -183,6 +207,8 @@ func (board *Board) Request(key int,request []byte) [][]byte {
 		if err != nil { 
 			result =  "error:bad number" 
 		} else {
+		
+			client.cur_view = key								
 			result = board.ReadItem(key)
 			//rs.Ws.Write([]byte(result))
 			
@@ -204,7 +230,27 @@ func (board *Board) Request(key int,request []byte) [][]byte {
 			board.AddImage(fields[4])
 		}
 		result =  board.AddItem(fields[1],fields[2],fields[3])
-		
+	case "comment":
+		if fcount == 4 {
+			log.Println("comment message",fields)
+			key,_ := strconv.Atoi(fields[1])
+			
+			result = board.addComment(key,fields[2],fields[3])
+			
+			/*
+			comments,ok := board.Comments[key]
+			
+			if !ok {
+				comments = make([]*Comment,0,50)				
+			}
+						
+			board.Comments[key] = append(comments,
+				 &Comment{fields[2],fields[3]} )  
+				
+			
+			result = "#addcmt:" + fields[1] + "/" + fields[2]	+ "/" + fields[3]
+			*/	
+		}		
 	case "delete":
 		if fcount < 2 {
 			result =  "error:read need more argument"
@@ -224,10 +270,47 @@ func (board *Board) Request(key int,request []byte) [][]byte {
 	return [][]byte{[]byte(result)}
 }
 
-func (board Board) KernelInfo() string{
-	return "web board kernel  v0.2"
+func (board Board) addComment(key int, owner, cont string ) string {
+	
+	comments,ok := board.Comments[key]
+	
+	if !ok {
+		comments = make([]*Comment,0,50)				
+	}				
+	board.Comments[key] = append(comments, &Comment{owner,cont})  
+	
+	list := ""
+	for i,client := range(board.Clients) {
+		if client.cur_view == key {
+			if len(list)  > 0 { list += "," } 
+			list += strconv.Itoa(i)				
+		}		 
+	}
+	
+	return "[" + list + "]" + "addcmt:" + strconv.Itoa(key) + "/" + owner + "|" + cont		
 }
 
+
+
+
+func (board Board) KernelInfo() string{
+	return "web board kernel  v0.51"
+}
+
+
+func (board *Board) ReadComments( key int) string{
+
+	result := ""	
+	if comments,ok := board.Comments[key];ok{		
+		for _,cmt := range(comments){			
+			if len(result) > 0 { result += ","	} 			
+			result += cmt.owner  + "|" + cmt.cmt		
+		}						
+	}
+	
+	log.Println("read comments for ", key , ":" , result)
+	return result
+}
 
 
 func (board *Board) ReadItem( key int) string{
@@ -241,12 +324,12 @@ func (board *Board) ReadItem( key int) string{
 	subj := item.subject 
 	content := item.content
 	cnt :=  strconv.Itoa(item.wcount)
-	
+		
 	item.wcount += 1
 	log.Println(key, "th item count now:" , item.wcount)
 	
 	result := cmd + ":" +  strconv.Itoa(key) + "/" + owner + "/" +
-		subj + "/" + content + "/" + cnt
+		subj + "/" + content + "/" + cnt + "/" + board.ReadComments(key)
 		
 	wilist,ok := board.WImages[key]
 	if ok {
@@ -260,7 +343,7 @@ func (board *Board) ReadItem( key int) string{
 		result += "/" + thumb_str		
 	}
 	
-
+	
 		
 	return result
 		 
@@ -304,6 +387,7 @@ func (board *Board) AddImage(imgInput string){
 		buff := Decode(nil,[]byte(imgstr),base64.StdEncoding)
 		img,_ := ByteToImage(buff)
 		wilist[i] = CreateWebImage(img,"")
+		log.Println("create wi complete")
 	}
 	
 	board.WImages[board.lastId] = wilist	
@@ -329,7 +413,7 @@ func (board *Board) ReadImage(imgkey string) string {
 		}
 	}
 	
-	log.Println("openimg:" + result)
+	//log.Println("openimg:" + result)
 
 	return result
 }
