@@ -36,6 +36,7 @@ type Board struct {
 	WImages map[int] []*WebImage
 	Comments map[int] []*Comment  
 	Clients	map[int] *Client	
+	Watching map[int] int
 }
 
 
@@ -51,6 +52,7 @@ func (board *Board) initboard(){
 	board.WImages = make(map[int] []*WebImage)
 	board.Comments = make(map[int] []*Comment)
 	board.Clients = make(map[int] *Client)
+	board.Watching = make(map[int] int)
 	board.lastId = 0
 	
 } 
@@ -113,9 +115,9 @@ func (board Board) listPage(page,pagesize int) string {
 	for cnt:=0;cnt<max;i--{
 				
 		if item,ok := board.Contents[i];ok {
-						
+			if cnt != 0 { result += "|" } 			
 			result +=   strconv.Itoa(item.id) + "/" + item.owner +
-			 "/" + item.subject + "/" + strconv.Itoa(item.wcount) + "|"
+			 "/" + item.subject + "/" + board.ItemInfo(item.id)
 			
 			log.Println(result,"-",cnt)
 			
@@ -141,6 +143,32 @@ func (board Board) getRecordString(key int) (string){
 			 
 	
 } 
+
+
+func (board *Board) ItemInfo(key int) string{
+/* cmt/view[watching]/imgcnt */
+	
+	view := strconv.Itoa(board.Contents[key].wcount)
+	
+	watching := ""
+	if w,ok := board.Watching[key];ok && w > 0{	
+		watching = "[" + strconv.Itoa(w) + "]"
+	}
+	
+	cmt := ""
+	if arr,ok := board.Comments[key];ok{
+		cmt = "[" + strconv.Itoa(len(arr)) + "]"
+	}
+	
+	imgcnt := ""
+	if arr,ok := board.WImages[key];ok{
+		imgcnt = strconv.Itoa(len(arr))
+	}
+ 	
+	return  cmt + "/" + view +	watching +	"/" + imgcnt
+	
+	
+}
 
 
 func (board *Board) Request(cnum int,request []byte) [][]byte {
@@ -208,12 +236,32 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 			result =  "error:bad number" 
 		} else {
 		
-			client.cur_view = key								
+			last := client.cur_view			
+			client.cur_view = key	
+				
+			
+			if _,ok := board.Watching[key];!ok {
+				board.Watching[key] = 0
+			}
+			board.Watching[key] += 1			
+			if last != -1 { board.Watching[last] -= 1 }
+						
+									
 			result = board.ReadItem(key)
 			//rs.Ws.Write([]byte(result))
-			
+			/*
 			result2 := "%cnt:" + strconv.Itoa(key) +
 				"/" + strconv.Itoa(board.Contents[key].wcount)
+			*/
+			
+			
+			result2 := "%update:" + strconv.Itoa(key) + "/" + board.ItemInfo(key)
+						
+			if last != -1 {
+				result3 := "%update:" + strconv.Itoa(last) + "/" + board.ItemInfo(last)
+				return [][]byte{ []byte(result), []byte(result2) , []byte(result3)}
+			}
+				 
 			
 			return [][]byte{ []byte(result), []byte(result2) }
 		}
@@ -236,20 +284,11 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 			key,_ := strconv.Atoi(fields[1])
 			
 			result = board.addComment(key,fields[2],fields[3])
+			result2 := "%update:" + strconv.Itoa(key) + "/" + board.ItemInfo(key)
 			
-			/*
-			comments,ok := board.Comments[key]
+			return [][]byte{ []byte(result), []byte(result2) }
 			
-			if !ok {
-				comments = make([]*Comment,0,50)				
-			}
-						
-			board.Comments[key] = append(comments,
-				 &Comment{fields[2],fields[3]} )  
-				
 			
-			result = "#addcmt:" + fields[1] + "/" + fields[2]	+ "/" + fields[3]
-			*/	
 		}		
 	case "delete":
 		if fcount < 2 {
@@ -373,7 +412,7 @@ func (board *Board) AddItem(isend,isubj,icont string )string{
 	
 	log.Println("last_id:",board.lastId)
 	
-	result := "%add:" + strconv.Itoa(id) + "/" + isend + "/"  + isubj + "/0"
+	result := "%add:" + strconv.Itoa(id) + "/" + isend + "/"  + isubj + "//0/"
 	return result
 
 }
