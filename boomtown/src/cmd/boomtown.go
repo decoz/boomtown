@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
+	"boomhttp"
 	
 	 	
 )
@@ -29,6 +30,8 @@ func main() {
 	
 	rsm.SetDefaultService(boardsrv)
 	go rsm.Run()
+	
+	go boomhttp.StartHttp()
 	
 	url := ":8515"
 	fmt.Println("boomtown server is running at ",url)
