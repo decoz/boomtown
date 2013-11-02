@@ -1,0 +1,219 @@
+<h1>  upload test </h1>
+
+
+
+<div id='uploader' > upload here </div> 
+ <br>
+
+<textarea id = 'imgbyte'></textarea>
+<input type = button onclick = "sendFile()" value = "send"> 
+<br>
+
+ <progress id="uploadprogress" min="0" max="100" value="0">0</progress>
+
+
+<div id = "thumb"> </div>
+<br>
+<div id="output"> </div>  
+
+<style type = "text/css" >
+#uploadprogress {
+	width:200px;	
+}
+
+#uploader {
+	font-size:24px;
+	font-weight:bold;
+	color:#aaaaaa;
+	text-align: center;
+	vertical-align: middle;
+	display:table-cell;
+	width:400px;
+	height:200px;
+	border:3px solid #aaaaaa;
+}
+
+#thumb {
+	width:100%;
+	height:50px;
+	border-top-style:solid;
+	border-bottom-style:solid;
+	border-color:#aaaaaa;
+              background-color:#eeeeee
+}
+
+#output { width: 100%;height:100px;
+                overflow:scroll;
+                font-size:10px;
+                border-style:inset;
+                border-color:#aaaaaa;
+                background-color:#eeeeee;}
+</style>	
+
+<script>
+
+var imgcount = 0
+var imglist = new Array()
+
+
+window.addEventListener("load", init, false);  
+
+
+function createImageFrom64(data64){
+
+	var image = new Image()
+	image.src = "data:image/jpeg;base64," + data64
+	return image
+
+}
+
+
+function appendImage(object, image){
+
+	object.appendChild(image)
+
+}
+
+
+
+
+
+function sendFile(){
+	log("send file!")
+	var image = imglist[0]
+	//log("img.src="+image.src)
+	var data = image.src.split(",")[1]
+
+	doSend(data)
+
+	uploader.removeChild(image)
+      	uploader.innerHTML = "drag file here"
+	delete(image)
+
+}
+function changeProgress(val){
+	uploadprogress.value = val;
+}
+
+uploader.ondragover = function(){this.className = 'hover';return false}
+uploader.ondragend = function(){this.className = '';return false}
+uploader.ondrop = function(e){
+	this.className = ''
+	e.preventDefault()
+	readfiles(e.dataTransfer.files)	
+}
+
+function previewfile(file) {
+
+    var reader = new FileReader();
+
+    reader.onload = function (event) {
+      var image = new Image();
+
+      image.src = event.target.result;
+      if(image.width > image.height * 2) {
+      	image.width = 400; // a fake resize
+      }
+      else image.height = 200
+
+
+
+      imglist[0] = image
+      uploader.innerHTML = ""
+      uploader.appendChild(image);
+
+      
+  }
+    reader.readAsDataURL(file);
+}
+
+function readfiles(files) {
+    debugger;
+    var formData = new FormData();
+    for (var i = 0; i < files.length; i++) {
+      formData.append('file', files[i]);
+      previewfile(files[i]);
+    }
+
+    /*
+    // now post a new XHR request
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/devnull.php');
+      xhr.onload = function() {
+        progress.value = progress.innerHTML = 100;
+      };
+
+      if (tests.progress) {
+        xhr.upload.onprogress = function (event) {
+          if (event.lengthComputable) {
+            var complete = (event.loaded / event.total * 100 | 0);
+            progress.value = progress.innerHTML = complete;
+          }
+        }
+      }
+
+      xhr.send(formData);
+     */
+    }
+
+
+
+/**************************** websocket ***********************************/
+    
+var  websocket
+  var wsUri = "ws://222.109.220.166:8515/img"; 
+      var output;  
+      function init() { 
+        output = document.getElementById("output"); 
+        testWebSocket(); 
+     } 
+     
+     function testWebSocket() { 
+     
+        websocket = new WebSocket(wsUri); 
+        websocket.onopen = function(evt) { onOpen(evt) }; 
+        websocket.onclose = function(evt) { onClose(evt) }; 
+        websocket.onmessage = function(evt) { onMessage(evt) }; 
+        websocket.onerror = function(evt) { onError(evt) }; 
+    }  
+    function onOpen(evt) { 
+        writeToScreen("CONNECTED"); 
+        //doSend("list/0/"+psize); 
+    }  
+
+    function onClose(evt) { 
+        writeToScreen("DISCONNECTED"); 
+    }  
+
+    function onMessage(evt) { 
+
+        //log('response:' + evt.data)
+       var  data64 = evt.data
+       var img = createImageFrom64(data64)
+       appendImage(thumb,img)
+  
+    }  
+
+    function doSend(message) { 
+        if(message.length < 50) writeToScreen("SENT: " + message);
+        else  writeToScreen("SENT: " + message.length + " byte ");
+        websocket.send(message); 
+    }  
+//
+/**************************** screen out ***********************************/
+    function writeToScreen(message) { 
+
+        var pre = document.createElement("p"); 
+        pre.style.wordWrap = "break-word"; 
+        pre.innerHTML = message; output.appendChild(pre); 
+
+        output.scrollTop = output.scrollHeight
+    }  
+
+    function log(message){
+    	writeToScreen("log:"+message)
+
+    
+    }
+
+</script>
