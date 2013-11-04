@@ -4,24 +4,24 @@ function execNCmd(cmd,attrs){
         case "next" : 
             page ++ 
             //alert("list/"+page)
-            doSend("list/"  + page + "/" + psize)
+            wsocket.doSend ("list/"  + page + "/" + psize)
             pagenum.innerHTML = "[" + (page+1) + "]"
             break;
         case "prev" : 
             page -- 
             if(page < 0){ page = 0; }
             else {
-                doSend("list/"  + page + "/" + psizee )
+                wsocket.doSend ("list/"  + page + "/" + psizee )
                 pagenum.innerHTML = "[" + (page+1) + "]"
             }
             break;
         case "delete":
                 if(attrs.length != 1) error("parameter error for delete")
-                else doSend("delete/"+attrs[0])
+                else wsocket.doSend ("delete/"+attrs[0])
                 break;
 
         default:
-           // doSend(cmd)
+           // wsocket.doSend (cmd)
     }
 }
 

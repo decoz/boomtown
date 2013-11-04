@@ -28,19 +28,25 @@ function init() {
 
     var msg_handler = new Array() 
 
-msg_handler["image"] =  h_image
-msg_handler["list"] =       h_list
-msg_handler["delete"] =     h_delete
-msg_handler["error"] =  h_error
-msg_handler["open"] =   h_open
-msg_handler["add"] =    h_add
-msg_handler["update"] =     h_update
-msg_handler["addcmt"] = h_addcmt
+    msg_handler["image"] =  h_image
+    msg_handler["list"] =       h_list
+    msg_handler["delete"] =     h_delete
+    msg_handler["error"] =  h_error
+    msg_handler["open"] =   h_open
+    msg_handler["add"] =    h_add
+    msg_handler["update"] =     h_update
+    msg_handler["addcmt"] = h_addcmt
 
     output = document.getElementById("output"); 
-    wsocket = createWebsocket(wsUrl); 
+    wsocket = new BoomSocket(wsUrl); 
     wsocket.msg_handler = msg_handler
     wsocket.printmsg = writeToScreen
+
+    wsocket.e_open = function(evt) {
+        wsocket.doSend("list/0/"+psize)
+
+    }
+    
 } 
 
 

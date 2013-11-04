@@ -19,7 +19,7 @@
 
         if( imgdata != "") cmd += "/[" + imgdata + "]"
 
-       if(subj != '' && cont != '') doSend(cmd)
+       if(subj != '' && cont != '') wsocket.doSend(cmd)
 
         rw_subj.value = ""
         rw_cont.value = ""
@@ -167,15 +167,6 @@ function clearTable(){
 
 lastSelected = null 
 
-function onClickRecord(){
-    if(lastSelected != null) lastSelected.className = ''
-    this.className = 'selected'
-    lastSelected = this
-
-    var key = this.getAttribute("key") 
-    doSend("read/"+key)
-}
-
 
 function insertRecord(record,cname,pos){
 
@@ -255,7 +246,7 @@ function deleteRecord(key){
         }
     }
 
-    doSend("list/"+page+"/"+psize)
+    wsocket.doSend("list/"+page+"/"+psize)
 }
 
 
@@ -271,7 +262,7 @@ function prevpage(){
       page -- 
         if(page < 0){ page = 0; }
         else {
-            doSend("list/"  + page + "/" + psize )
+            wsocket.doSend("list/"  + page + "/" + psize )
             pagenum.innerHTML = "[" + (page+1) + "]"
         }
 }
@@ -280,7 +271,7 @@ function prevpage(){
 function nextpage(){
 
      page ++ 
-    doSend("list/"  + page  + "/" + psize)
+    wsocket.doSend("list/"  + page  + "/" + psize)
     pagenum.innerHTML = "[" + (page+1) + "]"
 
 }
