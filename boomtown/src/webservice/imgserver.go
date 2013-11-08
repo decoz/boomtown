@@ -17,6 +17,8 @@ type WebImage struct {
 		
 }
 
+
+
 func (wi WebImage) GetE64() []byte {
 	
 	buff := ImageToByte(wi.Img,"jpg")

@@ -148,7 +148,8 @@ function show_rv_image(data){
     image.id = "cur_image"
 
     image.onclick = function(event){
-       rv_image.removeChild(event.srcElement ) 
+       //rv_image.removeChild(event.srcElement )    
+    	ivew.open(event.srcElement)
     }
     rv_image.innerHTML = ""
     rv_image.appendChild (image)
@@ -257,6 +258,11 @@ function deleteRows(start, delcount) {
 function log(msg){
     writeToScreen('log:'  + msg)
 }
+
+function error(msg){
+    writeToScreen('error:'  + msg)
+}
+
 
 function prevpage(){
       page -- 

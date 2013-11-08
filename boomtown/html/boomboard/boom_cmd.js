@@ -11,7 +11,7 @@ function execNCmd(cmd,attrs){
             page -- 
             if(page < 0){ page = 0; }
             else {
-                wsocket.doSend ("list/"  + page + "/" + psizee )
+                wsocket.doSend ("list/"  + page + "/" + psize )
                 pagenum.innerHTML = "[" + (page+1) + "]"
             }
             break;
@@ -19,7 +19,14 @@ function execNCmd(cmd,attrs){
                 if(attrs.length != 1) error("parameter error for delete")
                 else wsocket.doSend ("delete/"+attrs[0])
                 break;
-
+        case "saveboard":
+            	if(attrs.length != 1) wsocket.doSend("saveboard")
+            	else wsocket.doSend ("saveboard/"+attrs[0])
+            	break;
+        case "loadboard":
+        	if(attrs.length != 1) wsocket.doSend("loadboard")
+        	else wsocket.doSend ("loadboard/"+attrs[0])
+            	
         default:
            // wsocket.doSend (cmd)
     }
