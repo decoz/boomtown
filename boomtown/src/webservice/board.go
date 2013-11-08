@@ -4,86 +4,24 @@ import (
 	"log"
 	"strings"
 	"strconv"	
-	"fmt"
 	"encoding/base64"
-		
+	
 )
 
+type Item struct {
 
+	id	 	int
+	owner 	string
+	subject string
+	content string
+	wcount	int
+	
+}
 
 type Comment struct {		
 	owner	string
 	cmt  	string	
 }
-
-
-type L_comment []*Comment
-type ML_comment map[int] L_comment
-
-func (cmt Comment) ToString() string{
-	str := cmt.owner + "/" + cmt.cmt
-	return str
-}
-
-
-
-
-func (m_item M_item) ToString() string{
-
-	isfirst := true;
-	out := ""
-	for key,item := range(m_item) {
-		if isfirst { 
-			isfirst = false 
-		} else { 
-			out += "," 
-		} 
-		
-		out += strconv.Itoa(key) + ":" + item.ToString()
-	}	
-	
-	return out
-
-}
-
-func (l_cmt L_comment) ToString() string{
-	
-	isfirst := true;
-	out := ""
-	for _,cmt := range( l_cmt) {
-		if isfirst { 
-			isfirst = false 
-		} else { 
-			out += "," 
-		} 
-		
-		out +=  cmt.ToString()
-	}
-	
-	return out
-}
-
-
-func (ml_cmt ML_comment) ToString() string {
-
-	isfirst := true;
-	out := ""
-	for key,l_cmt := range(ml_cmt) {
-		if isfirst { 
-			isfirst = false 
-		} else { 
-			out += "," 
-		} 
-		
-		out += strconv.Itoa(key) + ":" + l_cmt.ToString()
-	}	
-	
-	return out
-
-}
-
-
-
 
 type Client struct {
 	cur_view 	int
@@ -94,9 +32,9 @@ type Client struct {
 
 type Board struct {	
 	lastId int
-	Contents M_item
+	Contents map[int] *Item 
 	WImages map[int] []*WebImage
-	Comments ML_comment  
+	Comments map[int] []*Comment  
 	Clients	map[int] *Client	
 	Watching map[int] int
 }
@@ -112,7 +50,7 @@ func CreateBoard() *Board{
 func (board *Board) initboard(){
 	board.Contents = make(map[int] *Item)
 	board.WImages = make(map[int] []*WebImage)
-	board.Comments = make(map[int] L_comment)
+	board.Comments = make(map[int] []*Comment)
 	board.Clients = make(map[int] *Client)
 	board.Watching = make(map[int] int)
 	board.lastId = 0
@@ -140,11 +78,10 @@ func MakeFieldsByExcept(c,s,e rune) func(rune)bool {
 			} 		
 		}
 		return false		
-	}	
+	}
+	
 	
 } 
-	
-	
 	
 
 func (board Board) listPage(page,pagesize int) string {
@@ -364,26 +301,6 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 			result = board.deleteItem(key)
 		}
 		 	
-	case "saveboard":
-		fname := "default.gob"
-		if fcount == 2 {
-			fname = fields[1]
-		}
-		
-		if err := board.SaveBoard(fname); err != nil{
-			fmt.Sprintf(result,"error:%s",err) 
-		}
-	
-	case "loadboard":
-		fname := "default.gob"
-		if fcount == 2 {
-			fname = fields[1]
-		}
-				
-		if err := board.LoadBoard(fname); err != nil{
-			fmt.Sprintf(result,"error:%s",err) 
-		}
-			 	
 	default: 
 		result = "error:bad command"
 	}
