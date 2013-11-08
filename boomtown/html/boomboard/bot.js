@@ -19,7 +19,7 @@
         idx = idx % dmcnt
         log(idx)
         log(dummy_list[idx])
-        doSend( "write/bot/" + dummy_list[idx]);
+        wsocket.doSend( "write/bot/" + dummy_list[idx]);
 
 
     }
