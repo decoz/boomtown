@@ -30,11 +30,18 @@ type Client struct {
 	id 			string		
 }
 
+
+type L_Cmt []Comment
+type M_L_Cmt map[int] L_Cmt
+type M_Item map[int] *Item
+type L_WImage []*WebImage
+type M_L_WImage map[int] L_WImage  
+
 type Board struct {	
 	lastId int
-	Contents map[int] *Item 
-	WImages map[int] []*WebImage
-	Comments map[int] []*Comment  
+	Contents M_Item 
+	WImages M_L_WImage
+	Comments M_L_Cmt
 	Clients	map[int] *Client	
 	Watching map[int] int
 }
@@ -49,8 +56,8 @@ func CreateBoard() *Board{
 
 func (board *Board) initboard(){
 	board.Contents = make(map[int] *Item)
-	board.WImages = make(map[int] []*WebImage)
-	board.Comments = make(map[int] []*Comment)
+	board.WImages = make(map[int] L_WImage)
+	board.Comments = make(M_L_Cmt)
 	board.Clients = make(map[int] *Client)
 	board.Watching = make(map[int] int)
 	board.lastId = 0
@@ -300,7 +307,24 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 		} else {
 			result = board.deleteItem(key)
 		}
-		 	
+	
+	case "saveboard":
+		fname := "default.dot"
+		if fcount >  1 {
+			fname = fields[1]
+		}
+		
+		board.SaveBoard(fname)  
+		result = "msg:board save complete"	
+		
+	case "loadboard":
+		fname := "default.dot"
+		if fcount >  1 {
+			fname = fields[1]
+		}
+		
+		board.LoadBoard(fname)  
+		result = "msg:board load complete"		 	
 	default: 
 		result = "error:bad command"
 	}
@@ -314,9 +338,9 @@ func (board Board) addComment(key int, owner, cont string ) string {
 	comments,ok := board.Comments[key]
 	
 	if !ok {
-		comments = make([]*Comment,0,50)				
+		comments = make([]Comment,0,50)				
 	}				
-	board.Comments[key] = append(comments, &Comment{owner,cont})  
+	board.Comments[key] = append(comments, Comment{owner,cont})  
 	
 	list := ""
 	for i,client := range(board.Clients) {
