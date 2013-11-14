@@ -211,7 +211,7 @@ func (board *Board) LoadBoard(fname string)string{
 		if k > board.lastId { board.lastId = k }	
 	}
 	
-		
+	board.lastId++
 	
 	
 	log.Println("current item cnt:",len(board.Contents)," lastid:",board.lastId)

@@ -1,7 +1,7 @@
 package dot
 
 import (
-	//"log"
+	//"log"	
 )
 
 
@@ -13,7 +13,7 @@ type Dot struct{
 }
 
 func NewDot(str string) *Dot{
-	return newDot([]byte(str))
+	return newDot(Enc(str))
 }
 
 func newDot(value []byte) *Dot{
@@ -51,7 +51,7 @@ func (dot *Dot) str() string{
 
 	str := ""
 	ccnt := len(dot.child) 
-		
+				
 	if dot.value != nil {
 		str += string(dot.value) 	
 	}
@@ -104,12 +104,12 @@ func (dot *Dot) AppendChild(children... *Dot){
 }
 
 func (dot *Dot) SetValue(str string){
-	dot.value = []byte(str)
+	dot.value = Enc(str)
 	
 }
 
 func (dot *Dot) GetValue() string {
-	return string(dot.value)
+	return Dec(dot.value)
 }
 
 func (dot *Dot) GetCValue() string {
@@ -126,14 +126,85 @@ func (dot *Dot) GetCValue() string {
 	
 }
 
-
-
-
 func (dot *Dot) GetKChild(k string) *Dot{	
 	for _,d := range dot.child {
 		if string(d.value) == k { return d }		
 	}	
 	return nil
 }
+
+func (dot *Dot) SetKChild(k string, val string) *Dot{
+/*
+	k key 값의 노드를 찾아 그 아래 벨류값을 변경한다. 
+	만일 k 노드나 value 노드가 없을 경우 생성한다.
+	
+	수행후 k 노드를 리턴한다.
+	
+*/
+
+	d := dot.GetKChild(k)
+	
+	if d == nil { 
+		d = NewDot(k)
+		dot.AppendChild(d) 
+	}
+	
+	if len(d.child) > 0 {d.child[0].SetValue(val)
+	} else  {
+		d.AppendChild( NewDot(val) )
+	}
+			
+	return d
+}
+
+
+func Enc(str string) []byte{
+
+	src := []byte(str) 
+	dst := make([]byte, len(str) + 10 )[0:0]
+	
+	for _,c := range src {
+		switch c {
+		case '.' : dst = append(dst,'&','d') 
+		case ',' : dst = append(dst,'&','c')
+		case '(' : dst = append(dst,'&','s')
+		case ')' : dst = append(dst,'&','e')
+		case '&' : dst = append(dst,'&','&')
+		default : dst = append(dst,c)
+		}
+	}
+	
+	return dst	 			
+}
+
+func Dec(src []byte) string{
+	 
+	dst := make([]byte, len(src))[0:0]
+	
+	flag := false
+	for _,c := range src {
+		if flag {
+			switch c {
+			case 'd' : dst = append(dst,'.')
+			case 'c' : dst = append(dst,',')
+			case 's' : dst = append(dst,'(')
+			case 'e' : dst = append(dst,')')
+			case '&' : dst = append(dst,'&')
+			}
+			flag = false 
+		} else {
+			if c == '&' { flag = true 
+			} else {
+				dst = append(dst,c)
+			}
+		}	
+	
+	}
+	
+	return string(dst)	 			
+}
+
+
+
 
 

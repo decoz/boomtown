@@ -26,6 +26,10 @@ func main() {
 	rsm := rshell.CreateRsManager()
 		
 	boardsrv := webservice.CreateBoard()
+	boardsrv.LoadBoard("default.dot")
+	defer boardsrv.SaveBoard("default.dot")
+	
+
 	imgsrv := webservice.CreateImgserve()
 	
 	rsm.SetDefaultService(boardsrv)

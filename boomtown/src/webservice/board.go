@@ -222,7 +222,7 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 		}
 		
 		if err!=nil { 
-			result = "error:bad format of list" 
+			result = "error:bad argument for list" 
 		} else {
 			client.cur_page = page
 			client.cur_psize = pagesize 
@@ -311,7 +311,7 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 	case "saveboard":
 		fname := "default.dot"
 		if fcount >  1 {
-			fname = fields[1]
+			fname = fields[1]+".dot"
 		}
 		
 		board.SaveBoard(fname)  
@@ -320,11 +320,22 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 	case "loadboard":
 		fname := "default.dot"
 		if fcount >  1 {
-			fname = fields[1]
+			fname = fields[1]+".dot"
 		}
 		
+		
 		board.LoadBoard(fname)  
-		result = "msg:board load complete"		 	
+		result1 := "msg:board load complete"		
+		result2 := "%list:" + board.listPage(client.cur_page,client.cur_psize)
+		
+		return [][]byte{[]byte(result1),[]byte(result2)}
+		
+	case "clearboard":
+		board.clearboard()  
+		result1 := "msg:board is cleared"		
+		result2 := "%list:" + board.listPage(client.cur_page,client.cur_psize)
+		return [][]byte{[]byte(result1),[]byte(result2)}
+		 	
 	default: 
 		result = "error:bad command"
 	}
@@ -410,6 +421,17 @@ func (board *Board) ReadItem( key int) string{
 		
 	return result
 		 
+}
+
+func (board *Board) clearboard() {
+	log.Println("board cleared by request")
+
+	board.Comments = make(map[int]L_Cmt) 
+	board.Contents = make(map[int] *Item)
+	board.WImages = make(map[int] L_WImage)
+	
+	board.lastId = 0
+	
 }
 
 

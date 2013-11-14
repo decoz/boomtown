@@ -131,8 +131,9 @@ if(flds.length == 2){
     p.appendChild(owner)
     p.appendChild(content)
 
+    
     rv_comment.appendChild(p)
-
+    rv_comment.scrollTop = rv_comment.scrollHeight;
     return p 
 }
 else return null

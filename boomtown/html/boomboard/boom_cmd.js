@@ -26,9 +26,9 @@ function execNCmd(cmd,attrs){
         case "loadboard":
         	if(attrs.length != 1) wsocket.doSend("loadboard")
         	else wsocket.doSend ("loadboard/"+attrs[0])
+        	
             	
-        default:
-           // wsocket.doSend (cmd)
+        default: wsocket.doSend (cmd)
     }
 }
 

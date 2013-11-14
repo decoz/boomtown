@@ -12,10 +12,10 @@ import (
 
 func (cmt Comment) ToDot() *dot.Dot {
 
-	dot1 := dot.NewDot("owner."+cmt.owner)
-	dot2 := dot.NewDot("cmt."+cmt.cmt)
 	dot0 := dot.NewDot("")
-	dot0.AppendChild(dot1,dot2)	
+	dot0.SetKChild("owner",cmt.owner)
+	dot0.SetKChild("cmt",cmt.cmt)
+			
 	return dot0
 
 }
@@ -45,15 +45,11 @@ func (m_l_cmt M_L_Cmt) ToDot() *dot.Dot{
 
 func (item Item) ToDot() *dot.Dot{
 	root := dot.NewDot("")
-	
-	d_id := dot.CreateDot("id."+strconv.Itoa(item.id))
-	d_cont := dot.CreateDot("content."+item.content) 
-	d_own :=  dot.CreateDot("owner."+item.owner)	
-	d_subj := dot.CreateDot("subject."+item.subject)
-	
-	root.AppendChild(d_id,d_cont,d_own,d_subj)
-	
-	//log.Println("//",root.ToString())
+	root.SetKChild("id",strconv.Itoa(item.id))
+	root.SetKChild("content",item.content)
+	root.SetKChild("owner",item.owner)
+	root.SetKChild("subject",item.subject)
+		
 	return root
 }  
 
@@ -74,12 +70,10 @@ func (m_item M_Item) ToDot() *dot.Dot{
 func (wi *WebImage) ToDot() *dot.Dot{
 
 	root := dot.NewDot("")
-	d_wimg := dot.CreateDot("img."+string(wi.GetE64()))
-	d_thumb := dot.CreateDot("thumb."+string(wi.GetThumbE64()))
-	root.AppendChild(d_wimg, d_thumb)
-	
+	root.SetKChild("img",string(wi.GetE64()))
+	root.SetKChild("thumb",string(wi.GetThumbE64()))
+		
 	return root
-
 }
 
 

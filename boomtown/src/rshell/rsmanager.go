@@ -15,7 +15,7 @@ type  RsManager struct{
 	rsmap map[int] *RShell
 	newconn	chan *websocket.Conn	
 	msgin	chan RsMsg
-	
+	msgout 	chan RsMsg
 	defsrv 	Service
 	
 }
@@ -32,6 +32,7 @@ func CreateRsManager() *RsManager{
 	rsm.rsmap = make(map[int] *RShell)
 	rsm.newconn = make(chan *websocket.Conn)
 	rsm.msgin = make(chan RsMsg)
+	rsm.msgout = make(chan RsMsg)
 	rsm.lastid = 0
 	
 	return rsm
@@ -50,6 +51,8 @@ func (rsm *RsManager) Run(){
 					rsm.patchResult(key,result)
 				}
 				
+			case svmsg := <-rsm.msgout:
+				rsm.patchResult(svmsg.key,svmsg.msg)			
 								 
 		}
 	}
