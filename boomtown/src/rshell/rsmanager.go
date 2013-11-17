@@ -131,7 +131,10 @@ func (rsm *RsManager) GetHandler(srv Service) func(ws *websocket.Conn) {
 		
 		
 		
-		defer func() { log.Println("handler out") }()	
+		defer func() {
+		 srv.Unlink(key)			
+		 log.Println(key," connnection out")		 
+		}()	
 	}
 
 }

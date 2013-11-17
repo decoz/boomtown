@@ -19,15 +19,17 @@ function execNCmd(cmd,attrs){
                 if(attrs.length != 1) error("parameter error for delete")
                 else wsocket.doSend ("delete/"+attrs[0])
                 break;
+                
         case "saveboard":
             	if(attrs.length != 1) wsocket.doSend("saveboard")
             	else wsocket.doSend ("saveboard/"+attrs[0])
             	break;
-        case "loadboard":
-        	if(attrs.length != 1) wsocket.doSend("loadboard")
-        	else wsocket.doSend ("loadboard/"+attrs[0])
-        	
             	
+        case "loadboard":
+        		if(attrs.length != 1) wsocket.doSend("loadboard")
+        		else wsocket.doSend ("loadboard/"+attrs[0])
+        		break;        	
+        		
         default: wsocket.doSend (cmd)
     }
 }

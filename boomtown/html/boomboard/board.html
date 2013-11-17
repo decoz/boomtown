@@ -14,7 +14,9 @@
 
 
 <script language="javascript" type="text/javascript">  
-var wsUrl = "ws://222.109.220.166:8515/ws"; 
+//var wsUrl = "ws://222.109.220.166:8515/ws"; 
+var ip  = location.host
+var wsUrl = "ws://"+ip+":8515/ws";
 var output;   
 var wsocket // =  createWebsocket(wsUrl)
 var ivew 
@@ -40,7 +42,7 @@ function init() {
     msg_handler["update"] =     h_update
     msg_handler["addcmt"] = h_addcmt
 
-    output = document.getElementById("output"); 
+    output = document.getElementById("output");     
     wsocket = new BoomSocket(wsUrl); 
     wsocket.msg_handler = msg_handler
     wsocket.printmsg = writeToScreen
@@ -451,7 +453,7 @@ a           {
 
     @-webkit-keyframes record_open {
         from {color: white;
-            -webkit-transform:translate(-200px,0) ;}
+            -webkit-transform:translate(-300px,0) ;}
         to {  color: black;
               -webkit-transform:translate(0,0) ; }
     }                      

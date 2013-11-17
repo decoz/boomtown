@@ -60,8 +60,12 @@ function onOutRecord(){
 
 function onImgClick(e){
 	var key = e.srcElement.getAttribute("key")
+	debugger
 	if(key in rvimage_list){
-	    show_rv_image(rvimage_list[key])       
+		var obj = document.getElementById("cur_image")
+		if(obj && obj.getAttribute("key") == key)		
+			rv_image.innerHTML = ""
+	    else show_rv_image(key,rvimage_list[key])       
 	}
 	else wsocket.doSend("openimg/"+key)
 

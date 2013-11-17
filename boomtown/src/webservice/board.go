@@ -322,11 +322,12 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 		if fcount >  1 {
 			fname = fields[1]+".dot"
 		}
-		
-		
+						
 		board.LoadBoard(fname)  
 		result1 := "msg:board load complete"		
 		result2 := "%list:" + board.listPage(client.cur_page,client.cur_psize)
+		
+		log.Println("----loaded ",fname,"----")
 		
 		return [][]byte{[]byte(result1),[]byte(result2)}
 		
@@ -521,3 +522,12 @@ func (board *Board) DummyInit(){
 		
 	log.Println("dummy contents ",len(board.Contents), " added")
 }
+
+
+func (board *Board) Unlink(key int) {
+	cl := board.Clients[key]
+	board.Watching[cl.cur_view]-- 
+	delete(board.Clients,key)
+
+}
+

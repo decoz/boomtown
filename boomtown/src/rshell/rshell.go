@@ -11,6 +11,7 @@ type Service interface {
 	
 	Request(int, []byte) [][]byte
 	KernelInfo() string
+	Unlink(key int)
 			
 }
 

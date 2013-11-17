@@ -58,7 +58,7 @@ function  h_image(imgstr){
     var key = arr[0]
     var  data = arr[1].substr(0,arr[1].length -1)
     rvimage_list [key] = data
-    show_rv_image(data)
+    show_rv_image(key,data)
 
 }
 

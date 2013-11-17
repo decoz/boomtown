@@ -70,6 +70,10 @@ func (imgsrv ImgServe) KernelInfo() string{
 
 } 
 
+func (imgsrv ImgServe) Unlink(key int){
+	 
+
+} 
 /*
 
 func (imgsrv Imgserve) LinkRs( rs *RShell ) {

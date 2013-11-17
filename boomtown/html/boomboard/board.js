@@ -143,11 +143,11 @@ else return null
 
 
 
-function show_rv_image(data){
+function show_rv_image(key,data){
     var image = new Image()
     image.src = "data:image/jpeg;base64," + data
     image.id = "cur_image"
-
+    image.setAttribute("key",key)
     image.onclick = function(event){
        //rv_image.removeChild(event.srcElement )    
     	ivew.open(event.srcElement)
