@@ -1,0 +1,173 @@
+
+<div  id = "area">
+	<div  id = "e_area">   <img src = '/logo.png'>  </div>
+	<canvas id  = "c_area"> </canvas>
+</div>
+
+<style type="text/css"> 
+
+#area {
+	position:relative;
+}
+
+#e_area {
+	top:0px;	
+	left:0px;
+	width:100%;
+	height:100%;
+	border:1px solid gray;
+	position: relative;
+	z-index: 100;
+}
+
+#c_area {
+	top:0px;	
+	left:0px;
+	position: absolute;
+}
+
+#e_area .rbox{
+	font-size:12px;
+	color:gray;
+	border-bottom:1px solid #eeeeee;
+	position: absolute;
+}
+</style>
+
+
+<script>
+
+var rect = e_area.getBoundingClientRect()
+c_area.width = rect.width 
+c_area.height = rect.height 
+
+var ctx = document.getElementById('c_area').getContext('2d');
+var firstclick= true;
+
+/*
+for(var i=0;i<10;i++){
+	var y = (i * 50) % 100
+	insert_box(100 * i,y, "hi")
+}
+*/
+
+function insert_box(x,y,value) {
+	var obj =document.createElement("div")
+	obj.className = 'rbox'
+	obj.innerHTML = value
+	obj.style.top= y + "px"
+	obj.style.left = x + "px"
+	obj.addEventListener("click",onclick_rbox,false)
+	e_area.appendChild(obj)
+	return obj
+}	
+
+function onclick_rbox(){
+	var rect = this.getBoundingClientRect()
+	var x = rect.left
+	var y = rect.top
+
+	if(firstclick){
+		firstclick = false
+		ctx.beginPath()
+		ctx.moveTo(x,y)
+	}
+	else {
+		firstclick = true
+		ctx.lineTo(x,y)
+		ctx.stroke()			
+	}
+
+}
+
+
+
+function addCanvas(obj){
+
+	var cv = document.createElement('canvas')
+	var rect = obj.getBoundingClientRect()
+	cv.width = rect.width
+	cv.height  = rect.height
+	cv.style.postion = "absolute"
+
+	return cv	
+}
+
+function CircleList(parent,cx,cy,rad){
+
+	this.layer['base'] = addCanvas(parent) 
+	this.circle = new Circle(cx,cy,rad) 
+
+
+
+}
+
+
+
+function Circle(x,y,rad){
+	this.cx = x
+	this.cy = y
+	this.rad = rad	
+
+	this.r2x = function(rad,range){
+	/* rad 는 0~360 도로 */
+		var r  = rad * 2 * Math.PI  / 360 
+		var  pt = new Object
+		pt.y = Math.sin(r) * range + this.cy
+		pt.x = Math.cos(r) * range + this.cx
+		return pt
+	}
+
+	this.draw = function(context,linewidth,color){
+		if(linewidth !=  null)  {
+			context .lineWidth = linewidth  
+			context.strokeStyle = color
+			context.beginPath()
+			context.arc(this.cx,this.cy,this.rad,0,2*Math.PI,false)
+		}
+	}
+
+	this.fill = function(context,color){
+		context.beginPath()
+		context.fillStyle = color 
+		context.strokeStyle = color
+		context.arc(this.cx,this.cy,this.rad,0,2*Math.PI,false)
+		context.fill()
+	}
+}
+
+
+var p = new Circle(0,0,315)
+p.draw(ctx,0.3,"gray")
+ctx.stroke()
+
+for(var i=5;i<=70;i+= 15){
+
+	var pt = p.r2x(i,280)
+	var pt_out = p.r2x(i,315)
+	var pt_edge = p.r2x(i,335)
+
+	obj = insert_box(pt.x-30,pt.y-10, "degree:"+i)
+	var rect = obj.getBoundingClientRect()
+	obj.style.left = pt.x - rect.width / 2
+	obj.style.top = pt.y - rect.height / 2
+
+	var tc = new Circle(pt_out.x,pt_out.y,5)
+	tc.fill(ctx,"gray")
+
+	ctx.beginPath()
+	ctx.moveTo(pt_out.x,pt_out.y)
+	ctx.lineTo(pt_edge.x,pt_edge.y)
+	ctx.stroke()
+
+}
+ctx.stroke()
+
+function draw_circle(x,y,size){
+	ctx.lineWidth = 0.3
+	 ctx.arc(x, y, size, 0, 2 * Math.PI, false);
+	 ctx.stroke()
+
+}
+
+</script>

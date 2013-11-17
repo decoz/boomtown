@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<title>Insert title here</title>
+
+<script src = "circlelist.js"></script>
+
+</head>
+<body onload = "init()">
+<div id = "main"> 
+	  <img src = '/logo.png' style = "position:absolute"> 
+</div>
+</body>
+
+<script>
+
+var  clist 
+ function init(){
+	clist = new CircleList(main,0,0,300)
+	clist2 = new CircleList(main,0,0,400)
+	clist.setStartAngle( 10 )
+	clist2.setStartAngle( 10 )
+	clist.stepangle = 20
+	clist.addValue("introduce","")
+	clist.addValue("work","")
+	clist.addValue("product","")
+	clist.addValue("contect","")
+	clist.addValue("position","")
+	/*
+	clist.addValue("회사소개","")
+	clist.addValue("전문분야","")
+	clist.addValue("제품","")
+	clist.addValue("연락처","")
+	clist.addValue("찾아오시는 길","")
+	*/
+	clist.stroke() 
+
+	clist2.addValue("sub1","")
+	clist2.addValue("sub2","")
+	clist2.addValue("sub3","")
+	clist2.addValue("sub4","")
+	clist2.addValue("sub5","")	
+	clist2.stroke()
+
+
+
+	//clist.animateAngle(clist.stepangle,20,10)	
+
+ }	
+
+
+</script>
+
+<style type = "text/css"> 
+#main {
+width:100%;
+height:100%;
+display:block;
+position:absolute;
+border:1px solid gray;
+overflow:hidden;
+}
+
+.clist_label {
+	font-size:14px;
+	color:#999999;
+	font-weight: 900;
+}
+
+
+</style>
+
+
+</html>
