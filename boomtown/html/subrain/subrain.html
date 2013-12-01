@@ -18,9 +18,9 @@
 var  clist 
  function init(){
 	clist = new CircleList(main,0,0,300)
-	clist2 = new CircleList(main,0,0,400)
+	
 	clist.setStartAngle( 10 )
-	clist2.setStartAngle( 10 )
+	
 	clist.stepangle = 20
 	clist.addValue("introduce","")
 	clist.addValue("work","")
@@ -36,13 +36,16 @@ var  clist
 	*/
 	clist.stroke() 
 
+	/*
+	clist2 = new CircleList(main,0,0,400)
+	clist2.setStartAngle( 10 )
 	clist2.addValue("sub1","")
 	clist2.addValue("sub2","")
 	clist2.addValue("sub3","")
 	clist2.addValue("sub4","")
 	clist2.addValue("sub5","")	
 	clist2.stroke()
-
+	*/
 
 
 	//clist.animateAngle(clist.stepangle,20,10)	

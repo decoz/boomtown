@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<script src = "dot.js"></script>
+<title>Insert title here</title>
+</head>
+<body>
+<div id = output> hi </div>
+
+
+<script> 
+
+
+
+var root = new dot("root")
+var child1 = new dot("child1") 
+root.AppendChild(child1)
+child1.AppendChild(new dot("child11"))
+child1.AppendChild(new dot("child12"))
+
+root.AppendChild(new dot("child2"))
+
+
+var tdot = dot.parse("man(name.kwak,age.18,fan.iu,member(yoo,kim))
+
+output.innerHTML =  tdot.GetChild("man.name")
+    
+    
+</script>    
+
+</body>
+</html>

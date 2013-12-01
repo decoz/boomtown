@@ -1,0 +1,43 @@
+<div id="outdiv"> value here ss</div>
+<script>
+
+
+function A(iobj) {
+        this.v = 5
+        this.obj = iobj
+
+
+        this.h_click= function(e){
+        	debugger;
+        	alert(this.v)
+	}
+
+	this.handle = function(evt,func){ 
+		var obj = this
+		var handler = function(e) {
+			func.apply(obj,[e])
+		}
+		this.obj.addEventListener(evt, handler ,false )
+	}
+
+	this.handle("click", this.h_click)
+
+}
+
+
+var a = new A(outdiv);
+
+function  h_over(e){
+	this.obj.style.color = 'red'	
+}
+
+
+function  h_out(e){
+	this.obj.style.color = 'black'	
+}
+
+a.handle("mouseover", h_over)
+a.handle("mouseout", h_out)
+
+
+</script>

@@ -1,10 +1,12 @@
 function dot(str){
-	this.value = str 
+	this.value = dot.Enc(str )
 	this.child = new Array()
 
 	this.AppendChild = function(dot){
+		
 		var cnt = this.child.length
 		this.child[cnt] = dot
+
 	}
 
 	this.GetChildList = function(){
@@ -19,9 +21,27 @@ function dot(str){
 		this.value  = dot.Enc(val)
 	}
 
-
 	this.GetValue = function(){
 		return dot.Dec(this.value )
+	}
+
+	this.ToString = function(){
+	
+		debugger;
+		var str = this.value
+
+		var cnt = this.child.length 
+
+		if( cnt  == 1 )  str += "."
+		if( cnt > 1) str += "("
+
+		for(var i=0;i<this.child.length;i++){
+			if( i > 0 ) str += ","
+			str  += this.child[i].ToString()
+		}
+
+		if(cnt > 1) str += ")"
+		return str
 	}
 
 }
@@ -32,7 +52,7 @@ dot.Enc = function(str){
 	result = ""
 	for(var i = 0 ;i  < str.length; i++){
 		var c = str[i]
-		switch c {
+		switch( c ){
 			case ',' : result += "&c"
 				break;
 			case '.' : result += "&d"
@@ -41,12 +61,15 @@ dot.Enc = function(str){
 				break;
 			case ')': result += "&e"
 				break;
-			case '&' result += "&&"
+			
+			case '&': result += "&&"
 				break;
+						
 			default:  result += c
 		}
 
 	}
+	return result
 }
 
 dot.Dec = function(str){
@@ -55,7 +78,7 @@ dot.Dec = function(str){
 	for(var i = 0 ;i  < str.length; i++){
 		var c = str[i]
 		if(flag){
-			switch c {
+			switch( c ){
 				case 'c' : result += ","
 					break;
 				case 'd' : result += "."
@@ -64,8 +87,9 @@ dot.Dec = function(str){
 					break;
 				case 'e': result += ")"
 					break;
-				case '&' result += "&"
+				case '&': result += "&"
 					break;
+			
 				default:  result += c
 			}
 
@@ -77,4 +101,84 @@ dot.Dec = function(str){
 		}
 
 	}
+	return result
 }
+
+
+dot.Parse = function(str){
+
+	var n = new dot("")
+
+
+
+}
+
+dot.parse = function(str){
+
+	var s = new stack()
+	var root = new dot("")
+	var cpar = root
+	var cobj = root
+	var val = ""
+	for(var i=0;i < str.length; i++){
+		switch( str[i] ){
+			case ',' : var obj = new dot(val) 
+				if(cobj!=null) cobj.AppendChild( obj)
+				cobj = cpar
+				val = ""
+				break;
+			case '.' :  var  obj = new dot(val);
+				cobj.AppendChild(obj)
+				cobj = obj
+				val = ""
+				break;
+
+			case '(' :  var obj = new dot(val);
+				cobj.AppendChild(obj)
+				s.push(cpar)
+				cpar = obj
+				cobj = obj
+				val = ""
+				break;
+
+			case ')' :  var obj = new dot(val);
+				if(cobj != null) cobj.AppendChild(obj)
+				cpar = s.pop()
+				cobj = null
+				val = ""
+				break;
+
+			default :
+				val += 	str[i]		
+				break;
+
+		}
+
+	}
+
+	var obj = new dot(val);
+	if(cobj != null) cobj.AppendChild(obj)
+
+	return root
+
+}
+
+function stack(){
+	this.arr = new Array()
+	this.last = 0
+	this.push =  function(obj){
+		this.arr[this.last] = obj
+		this.last++
+	}
+
+	this.pop = function() {
+		this.last--
+		if( this.last >=0 )  return this.arr[this.last]		
+		else return null
+	}
+	
+	this.getlast = function(){
+		return this.arr[this.last-1]
+	}
+}
+

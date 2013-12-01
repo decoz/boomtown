@@ -1,0 +1,92 @@
+
+<div  id = "area">
+	<div  id = "e_area">  </div>
+	<canvas id  = "c_area"> </canvas>
+</div>
+
+<style type="text/css"> 
+
+#area {
+	position:relative;
+}
+
+#e_area {
+	top:0px;	
+	left:0px;
+	width:100%;
+	height:300px;
+	border:1px solid gray;
+	position: relative;
+	z-index: 100;
+}
+
+#c_area {
+	top:0px;	
+	left:0px;
+	position: absolute;
+}
+
+#e_area .rbox{
+	width:100px;
+	border:1px solid gray;
+	background:white;
+	position: relative;
+}
+</style>
+
+
+<script>
+
+var rect = e_area.getBoundingClientRect()
+c_area.width = rect.width 
+c_area.height = rect.height 
+
+var ctx = document.getElementById('c_area').getContext('2d');
+var firstclick= true;
+
+ctx.lineWidth = 0.3;
+ctx.beginPath();
+ctx.moveTo(50, 10);
+ctx.lineTo(450, 10);
+ctx.stroke();
+
+ctx.beginPath();
+ctx.moveTo(50.5, 50.5);
+ctx.lineTo(450.5, 50.5);
+ctx.stroke();
+
+for(var i=0;i<10;i++){
+	var y = (i * 50) % 100
+	insert_box(100 * i,y, "hi")
+}
+
+function insert_box(x,y,value) {
+	var obj =document.createElement("div")
+	obj.className = 'rbox'
+	obj.innerHTML = value
+	obj.style.top= y + "px"
+	obj.style.left = x + "px"
+	obj.addEventListener("click",onclick_rbox,false)
+	e_area.appendChild(obj)
+}	
+
+function onclick_rbox(){
+	var rect = this.getBoundingClientRect()
+	var x = rect.left
+	var y = rect.top
+
+	if(firstclick){
+		firstclick = false
+		ctx.beginPath()
+		ctx.moveTo(x,y)
+	}
+	else {
+		firstclick = true
+		ctx.lineTo(x,y)
+		ctx.stroke()			
+	}
+
+}
+
+
+</script>
