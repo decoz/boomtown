@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<title>Insert title here</title>
+<script src = "/jslib/dtable.js"></script>
+</head>
+<body>
+
+<table id = 'tbl'>
+<thead> 
+<th> no </th>
+<th> key </th>
+</thead>
+
+<tr>
+<td> 1 </td>
+<td> a </td>
+</tr>
+<tr>
+<td> 2 </td>
+<td> b </td>
+</tr><tr>
+<td> 3 </td>
+<td> c </td>
+</tr>
+</table>
+
+
+</body>
+<script>
+
+var dtbl = new dtable(tbl)
+dtbl.SetHeader(["id","name","xxx"],true)
+
+dtbl.SetClass(null,null,'dtbl')
+dtbl.SetClass(-1,null,'head')
+dtbl.InsertData(1,["2.5","bright"])
+dtbl.AppendData(["4","d"])
+</script>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>  
+
+<title>Boom eye prototype </title> 
+
+<script src = "/jslib/websocket.js"></script>
+<script src = "iupload.js"></script>
+
+<div id='uploader' > upload here </div> 
+ 
+<br>
+
+<style type = "text/css" >
+#uploadprogress {
+	width:200px;	
+}
+
+#uploader {
+	font-size:24px;
+	font-weight:bold;
+	color:#aaaaaa;
+	text-align: center;
+	vertical-align: middle;
+	display:table-cell;
+	width:400px;
+	height:200px;
+	border:3px solid #aaaaaa;
+	overflow-y:scroll;
+}
+
+#thumb {
+	width:100%;
+	height:50px;
+	border-top-style:solid;
+	border-bottom-style:solid;
+	border-color:#aaaaaa;
+              background-color:#eeeeee
+}
+
+#output { width: 100%;height:100px;
+                overflow:scroll;
+                font-size:10px;
+                border-style:inset;
+                border-color:#aaaaaa;
+                background-color:#eeeeee;}
+</style>	
+
+<script>
+
+var iu = new iupload(uploader)
+
+iu.onfile = function(file,content){
+
+	alert(file.name)
+
+
+}
+
+
+</script>
