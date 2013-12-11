@@ -13,8 +13,15 @@ function dot(str){
 		return this.child
 	}
 
-	this.GetChild  = function(i){
+	this.GetNChild  = function(i){
 		return this.child[i]
+	}
+
+	this.GetVChild = function(v){
+		for(var i in this.child) {
+			if(this.child[i] == v) return this.child[i]			
+		}	
+		return  null
 	}
 
 	this.SetValue = function(val){
@@ -25,9 +32,29 @@ function dot(str){
 		return dot.Dec(this.value )
 	}
 
+	this.GetChildCount = function() {
+		return  this.child.length		
+	}
+
+
+	this.GetChild = function(str){
+		alert("!")
+		var path = str.split(".")
+		var cur = this
+		for(var i in path){
+			debugger
+			var  d =  cur.GetVChild(path[i])
+
+			if( d==null ) return null 
+			else cur = d
+		}
+
+		return cur
+	}
+
+
 	this.ToString = function(){
 	
-		debugger;
 		var str = this.value
 
 		var cnt = this.child.length 
@@ -105,13 +132,16 @@ dot.Dec = function(str){
 }
 
 
-dot.Parse = function(str){
+dot.Create = function(str){
 
-	var n = new dot("")
-
-
+	var root = dot.parse(str)
+	if(root.GetChildCount() == 1) {
+		return root.child[0]
+	}
+	else return root
 
 }
+
 
 dot.parse = function(str){
 
