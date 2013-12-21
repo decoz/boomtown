@@ -155,25 +155,34 @@ function onCommand(){
     //var carr = cmd.split(" ")
     
     var d_cmd = DotCmd.cmd2dot(s_cmd)
-    alert(d_cmd.ToString())
+    var cmd =  d_cmd.GetVChild("cmd").ChildString()
+
+    //alert(d_cmd.ToString()+" := "+ cmd)
 
     //var d = new dot("req")
     //alert(d.ToString())
-    /*
-    switch( carr[0] ){      
-      case 'put' :           
-          var c = dot.Create("cmd.put(file,as)")
-          var d_file = c.GetChild("put.file")
+    
+    switch( cmd){      
+      case 'put' :     
+          if(img.length < 1)  return null
 
-          if(carr[1] == "as") {
+          var imgstr 
+          if(dt.selected != null)  imgstr = img[dt.selected]          
+          else imgstr = img[0]
 
-          }
-
+          var base64 = imgstr.split(",")[1]
           
-          //alert(c.Get("put.file").ToString())                                        
+
+          var d_child = d_cmd.GetChild("attr")
+          var d_img = dot.Create("img.src."+base64)
+          d_child.AppendChild(d_img)
+
+          alert(d_cmd.ToString())
+
+          break;    
 
     }
-    */
+    
 
 
 }

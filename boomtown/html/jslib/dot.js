@@ -24,6 +24,15 @@ function dot(str){
 		return  null
 	}
 
+	this.ChildString = function(){
+		var str = ""
+		for(var i in this.child) {
+			if(i > 0)  str += ","
+			str += this.child[i].ToString()
+		}	
+		return str
+	}
+
 	this.SetValue = function(val){
 		this.value  = dot.Enc(val)
 	}

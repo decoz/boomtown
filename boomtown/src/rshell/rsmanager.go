@@ -21,8 +21,8 @@ type  RsManager struct{
 }
 
 type RsMsg  struct {
-	key int
-	msg []byte
+	Key int
+	Msg []byte
 }
 
 
@@ -31,8 +31,8 @@ func CreateRsManager() *RsManager{
 	rsm := new( RsManager )
 	rsm.rsmap = make(map[int] *RShell)
 	rsm.newconn = make(chan *websocket.Conn)
-	rsm.msgin = make(chan RsMsg)
-	rsm.msgout = make(chan RsMsg)
+	rsm.msgin = make(chan RsMsg, 1000)
+	rsm.msgout = make(chan RsMsg, 1000)
 	rsm.lastid = 0
 	
 	return rsm
@@ -43,16 +43,14 @@ func (rsm *RsManager) Run(){
 	for{log.Print("-")
 		select {			
 			case rsmsg :=  <- rsm.msgin:
-				//log.Println("request from ",rsmsg.key," :",string(rsmsg.msg))
-				key := rsmsg.key	
+		
+				key := rsmsg.Key	
 				rs,_ :=  rsm.rsmap[key]		
-				results := rs.service.Request(key,rsmsg.msg)
-				for _,result := range(results){ 
-					rsm.patchResult(key,result)
-				}
-				
+				rs.service.Request(key,rsmsg.Msg)
+		
 			case svmsg := <-rsm.msgout:
-				rsm.patchResult(svmsg.key,svmsg.msg)			
+				//log.Println("--------------------------------------------------------------------")
+				rsm.patchResult(svmsg.Key,svmsg.Msg)			
 								 
 		}
 	}
@@ -111,7 +109,9 @@ func (rsm *RsManager) SetDefaultService(service Service){
 }
  
 func (rsm *RsManager) GetHandler(srv Service) func(ws *websocket.Conn) {
-			
+
+	srv.SetChannel(&rsm.msgout)
+				
 	return func(ws *websocket.Conn){
 		log.Println("ws: new connection")
 		log.Println("connection to:",srv.KernelInfo())

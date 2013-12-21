@@ -175,7 +175,6 @@ func (m_l_wi M_L_WImage ) FromDot(d *dot.Dot) {
 
 
 
-
 func (board *Board) LoadBoard(fname string)string{
 
 	log.Println("now restored board from",fname )

@@ -171,7 +171,7 @@ func Enc(str string) []byte{
 		case ')' : dst = append(dst,'&','e')
 		case '&' : dst = append(dst,'&','&')
 		default : dst = append(dst,c)
-		}
+		} 
 	}
 	
 	return dst	 			

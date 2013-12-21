@@ -5,6 +5,8 @@ import (
 	"strings"
 	"strconv"	
 	"encoding/base64"
+	"rshell"
+	
 	
 )
 
@@ -37,13 +39,19 @@ type M_Item map[int] *Item
 type L_WImage []*WebImage
 type M_L_WImage map[int] L_WImage  
 
-type Board struct {	
+
+type Board struct {
+
+	msgout *chan rshell.RsMsg
+	
 	lastId int
 	Contents M_Item 
 	WImages M_L_WImage
 	Comments M_L_Cmt
 	Clients	map[int] *Client	
 	Watching map[int] int
+	
+	
 }
 
 
@@ -53,6 +61,11 @@ func CreateBoard() *Board{
 	board.initboard()
 	return board
 }
+
+func (board *Board) SetChannel(rsmch *chan rshell.RsMsg){
+	board.msgout = rsmch
+}
+
 
 func (board *Board) initboard(){
 	board.Contents = make(map[int] *Item)
@@ -177,8 +190,13 @@ func (board *Board) ItemInfo(key int) string{
 	
 }
 
+func (board Board) send(cnum int, content string){
+	smsg := rshell.RsMsg{Key:cnum,Msg:[]byte(content)} 
+	*board.msgout <- smsg
+}
 
-func (board *Board) Request(cnum int,request []byte) [][]byte {
+
+func (board *Board) Request(cnum int,request []byte){
 	
 	
 	if _,ok := board.Clients[cnum];!ok{
@@ -205,12 +223,6 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 	case "list":
 		log.Println("board: list item subject -",len(board.Contents))
 		result = "list:" 
-		/*
-		for _,item := range(board.Contents) {
-			result +=   strconv.Itoa(item.id) + "/" + item.owner + "/" + item.subject + "|"					
-		}
-		log.Println("result:",result)
-		*/
 		
 		page,pagesize := 0,10
 		var err error   
@@ -222,16 +234,20 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 		}
 		
 		if err!=nil { 
-			result = "error:bad argument for list" 
+			board.send(cnum,"error:bad argument for list")
+					
 		} else {
 			client.cur_page = page
-			client.cur_psize = pagesize 
-			result = "list:" + board.listPage(page,pagesize)
+			client.cur_psize = pagesize		 
+			temp := "list:" + board.listPage(page,pagesize)
+						
+			board.send(cnum,temp)
+			
 		}	
 		
 	case "kernel":
 		log.Println("board: send kernel info")
-		result =  board.KernelInfo()		
+		board.send(cnum,board.KernelInfo())		
 		
 		
 	case "read":
@@ -255,27 +271,20 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 						
 									
 			result = board.ReadItem(key)
-			//rs.Ws.Write([]byte(result))
-			/*
-			result2 := "%cnt:" + strconv.Itoa(key) +
-				"/" + strconv.Itoa(board.Contents[key].wcount)
-			*/
-			
-			
-			result2 := "%update:" + strconv.Itoa(key) + "/" + board.ItemInfo(key)
+			board.send(cnum,result)
 						
+			result = "%update:" + strconv.Itoa(key) + "/" + board.ItemInfo(key)
+			board.send(cnum,result)			
 			if last != -1 {
-				result3 := "%update:" + strconv.Itoa(last) + "/" + board.ItemInfo(last)
-				return [][]byte{ []byte(result), []byte(result2) , []byte(result3)}
+				result = "%update:" + strconv.Itoa(last) + "/" + board.ItemInfo(last)
+				board.send(cnum,result)			
 			}
-				 
-			
-			return [][]byte{ []byte(result), []byte(result2) }
+							
 		}
 	case "openimg": 
 		if fcount == 2 {			
-			result = board.ReadImage(fields[1])			
-		} else { result =  "error:read need more argument" } 
+			board.send(cnum, board.ReadImage(fields[1]))			
+		} else { board.send(cnum,"error:read need more argument") } 
 		
 	case "write":
 		if fcount < 4 {
@@ -284,28 +293,28 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 		if fcount == 5 {
 			board.AddImage(fields[4])
 		}
-		result =  board.AddItem(fields[1],fields[2],fields[3])
+				
+		board.send(cnum,board.AddItem(fields[1],fields[2],fields[3]))
+		
 	case "comment":
 		if fcount == 4 {
 			log.Println("comment message",fields)
 			key,_ := strconv.Atoi(fields[1])
-			
-			result = board.addComment(key,fields[2],fields[3])
-			result2 := "%update:" + strconv.Itoa(key) + "/" + board.ItemInfo(key)
-			
-			return [][]byte{ []byte(result), []byte(result2) }
+						
+			board.send(cnum,board.addComment(key,fields[2],fields[3]))
+			board.send(cnum,"%update:" + strconv.Itoa(key) + "/" + board.ItemInfo(key))
 			
 			
 		}		
 	case "delete":
 		if fcount < 2 {
-			result =  "error:read need more argument"
+			board.send(cnum,"error:read need more argument")
 		}
 		key,err :=  strconv.Atoi(fields[1])
 		if err != nil { 
-			result =  "error:bad number" 
+			board.send(cnum,"error:bad number") 
 		} else {
-			result = board.deleteItem(key)
+			board.send(cnum,board.deleteItem(key))
 		}
 	
 	case "saveboard":
@@ -314,8 +323,8 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 			fname = fields[1]+".dot"
 		}
 		
-		board.SaveBoard(fname)  
-		result = "msg:board save complete"	
+		board.SaveBoard(fname) 		
+		board.send(cnum,"msg:board save complete")
 		
 	case "loadboard":
 		fname := "default.dot"
@@ -323,26 +332,22 @@ func (board *Board) Request(cnum int,request []byte) [][]byte {
 			fname = fields[1]+".dot"
 		}
 						
-		board.LoadBoard(fname)  
-		result1 := "msg:board load complete"		
-		result2 := "%list:" + board.listPage(client.cur_page,client.cur_psize)
-		
+		board.LoadBoard(fname)			
+		board.send(cnum,"msg:board load complete")		
+		board.send(cnum,"%list:" + board.listPage(client.cur_page,client.cur_psize))
 		log.Println("----loaded ",fname,"----")
 		
-		return [][]byte{[]byte(result1),[]byte(result2)}
+		
 		
 	case "clearboard":
-		board.clearboard()  
-		result1 := "msg:board is cleared"		
-		result2 := "%list:" + board.listPage(client.cur_page,client.cur_psize)
-		return [][]byte{[]byte(result1),[]byte(result2)}
-		 	
-	default: 
-		result = "error:bad command"
+		board.clearboard()			
+		board.send(cnum,"msg:board is cleared")		
+		board.send(cnum,"%list:" + board.listPage(client.cur_page,client.cur_psize))
+				 	
+	default:		
+		board.send(cnum,"error:bad command")
 	}
-
 	
-	return [][]byte{[]byte(result)}
 }
 
 func (board Board) addComment(key int, owner, cont string ) string {

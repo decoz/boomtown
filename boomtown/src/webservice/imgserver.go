@@ -5,7 +5,9 @@ import (
 	//"io/ioutil"
 	"encoding/base64"	
 	"image"
-	"strconv"
+	//"strconv"
+	"dot"
+	"rshell"
 	
 )
 
@@ -47,11 +49,11 @@ func CreateWebImage(img image.Image,name string) *WebImage{
 
 type ImgServe struct{
 	 
+	msgout *chan rshell.RsMsg
 	imglist map[int] *WebImage
 	lastindex int
 	 	
 }
-
 
 func CreateImgserve() *ImgServe {
 
@@ -74,6 +76,11 @@ func (imgsrv ImgServe) Unlink(key int){
 	 
 
 } 
+
+func (imgsrv *ImgServe) SetChannel(rsmch *chan rshell.RsMsg){
+	imgsrv.msgout = rsmch
+}
+
 /*
 
 func (imgsrv Imgserve) LinkRs( rs *RShell ) {
@@ -89,12 +96,17 @@ func (imgsrv Imgserve) UnLinkRs(key int) {
 
 }
 */
+func (imgsrv *ImgServe) send(cnum int, content string){
+	smsg := rshell.RsMsg{Key:cnum,Msg:[]byte(content)} 
+	*imgsrv.msgout <- smsg
+}
 
-func (imgsrv *ImgServe) Request(key int ,data []byte)  [][]byte{
+func (imgsrv *ImgServe) Request(key int ,data []byte){
 	log.Println("request for imgsrv")
+	result := "" 
 	//cmd,_  := getString(data)
 	
-			
+	/*		
 	buff := Decode(nil,data,base64.StdEncoding)	
 	img,_ := ByteToImage(buff)	
 	wi := CreateWebImage(img,"img"+strconv.Itoa(imgsrv.lastindex))
@@ -106,8 +118,14 @@ func (imgsrv *ImgServe) Request(key int ,data []byte)  [][]byte{
 	//ioutil.WriteFile("last.png",buff,0644)
 	result := wi.GetThumbE64()  
 	log.Println("return byte:",len(result))
-
-	return [][]byte {result}
+	*/
+	
+	
+	d_req := dot.CreateDot(string(data))
+	result = d_req.ToString()
+	
+	imgsrv.send(key,result)
+	
 }
 
 

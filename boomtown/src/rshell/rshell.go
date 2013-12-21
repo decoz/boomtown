@@ -9,7 +9,8 @@ import (
 
 type Service interface {
 	
-	Request(int, []byte) [][]byte
+	Request(int, []byte) 
+	SetChannel(*chan RsMsg)
 	KernelInfo() string
 	Unlink(key int)
 			
