@@ -5,61 +5,27 @@ import (
 	//"io/ioutil"
 	"encoding/base64"	
 	"image"
-	//"strconv"
+	"strconv"
 	"dot"
 	"rshell"
 	
 )
 
-type WebImage struct {
-	
-	Img image.Image
-	Thumb image.Image
-	SrcName string
-		
-}
-
-
-
-func (wi WebImage) GetE64() []byte {
-	
-	buff := ImageToByte(wi.Img,"jpg")
-	rbuff := Encode(nil,buff,base64.StdEncoding)
-	return rbuff
-			
-}
-
-func (wi WebImage) GetThumbE64() []byte {
-
-	buff := ImageToByte(wi.Thumb,"jpg")
-	rbuff := Encode(nil,buff,base64.StdEncoding)
-	return rbuff
-
-}
-
-func CreateWebImage(img image.Image,name string) *WebImage{
-
-	wi := new(WebImage)
-	wi.Img = img
-	wi.Thumb = CreateThumbnail(img,50,50)	
-	wi.SrcName = name
-		
-	return wi
-}
 
 type ImgServe struct{
 	 
 	msgout *chan rshell.RsMsg
-	imglist map[int] *WebImage
-	lastindex int
+	imglist map[string] *image.Image
+	last int
+	
 	 	
 }
 
 func CreateImgserve() *ImgServe {
 
 	imgsrv := new(ImgServe) 
-	imgsrv.imglist = make(map[int] *WebImage)
-	imgsrv.lastindex = 0
+	imgsrv.imglist = make(map[string] *image.Image)
+	imgsrv.last = 0
 	 
 	return imgsrv
 
@@ -97,13 +63,14 @@ func (imgsrv Imgserve) UnLinkRs(key int) {
 }
 */
 func (imgsrv *ImgServe) send(cnum int, content string){
+	log.Println("send to",cnum,":"+content)
 	smsg := rshell.RsMsg{Key:cnum,Msg:[]byte(content)} 
 	*imgsrv.msgout <- smsg
 }
 
 func (imgsrv *ImgServe) Request(key int ,data []byte){
 	log.Println("request for imgsrv")
-	result := "" 
+	 
 	//cmd,_  := getString(data)
 	
 	/*		
@@ -122,12 +89,53 @@ func (imgsrv *ImgServe) Request(key int ,data []byte){
 	
 	
 	d_req := dot.CreateDot(string(data))
-	result = d_req.ToString()
+	//result = d_req.ToString()
 	
-	imgsrv.send(key,result)
+	cmd := d_req.GetKChild("cmd")
+	param := d_req.GetKChild("param")
+	attr := d_req.GetKChild("attr")
+	option := d_req.GetKChild("option")
+		
+	imgsrv.ExeCmd(key,cmd,param,attr,option)	
+	//imgsrv.send(key,result)	
+	
 	
 }
 
+func (imgsrv *ImgServe) ExeCmd(id int,cmd,param,attr,option *dot.Dot){
+
+	//log.Println("req from",id,":","["+cmd.GetCValue()+"]")
+	switch(cmd.GetCValue()){
+		
+		case "put": 
+			//log.Println("processing save transfered image") 
+			d_src := attr.GetChild("img.src")
+			if d_src == nil { return }
+ 			
+			src := d_src.GetCValue() 
+			buff := Decode(nil,[]byte(src),base64.StdEncoding)
+			img,_ := ByteToImage(buff)
+						
+			d_as := attr.GetChild("as")
+			name := ""
+			
+			if d_as != nil {
+				name = d_as.GetCValue()							
+			} else {
+				name = "img" + strconv.Itoa(imgsrv.last) 			
+				imgsrv.last++
+			} 
+			
+			imgsrv.imglist[name] = &img
+			
+			imgsrv.send(id,"image saved  as " + name)			
+		
+		case "get":	
+		
+	
+	}
+	
+}
 
 
 func Decode(decBuf, enc []byte, e64 *base64.Encoding) []byte { 
@@ -149,7 +157,7 @@ func Encode(encBuf, bin []byte, e64 *base64.Encoding) []byte {
         return encBuf[0:] 
 } 
 
-
+/*
 
 func getString(buff []byte) (string,int) {
 	
@@ -165,5 +173,5 @@ func getString(buff []byte) (string,int) {
 	return string(buff[:pos]),pos
 }  
 
-
+*/
 

@@ -1,3 +1,28 @@
+/*
+ * dtable : data 선택, 출력을 쉽게 하기 위한 dot 기반 테이블
+ * 테이블 생성후에 다음의 형식으로 사용한다.
+ * 
+ * var tbl = new dtable(object)
+ * 
+ * attr: 
+ * 
+ * 	selected : 셀렉트 된 위치  
+ * 
+ * method:
+ * 	 
+ * 	SetHeader(arr,isshow) header 의 id 값을 넣는다. 
+ * 	SetClass(row,col,cname) 테이블의 특정 영역을 classname 으로 설정한다.
+ * 	AppendData(arr) 테이블에 자료를 추가한다. 
+ * 	InsertData(idx,arr) 테이블에 자료를 삽입한다. 
+ *	GetRowArr(idx) idx 번째 row 의 값들을 배열로 받는다. 
+ * 
+ * event: 
+ * 
+ * 	onclick : 행 선택시  
+ *  
+ */
+
+
 function dtable(obj){
 
 	this.obj = obj	
@@ -129,6 +154,16 @@ function dtable(obj){
 			this.tbody.insertBefore(tr,next)
 		}
  		else this.AppendData(arr)
+	}
+
+	this.GetRowArr = function(idx){
+
+		var arr = new Array() 
+		var tr = this.tbody.children[idx]
+		for(var i =0;i <  tr.children.length;i++){
+			arr[i] = tr.children[i].innerHTML
+		}
+		return arr
 	}
 
 

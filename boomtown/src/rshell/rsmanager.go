@@ -60,6 +60,9 @@ func (rsm *RsManager) Run(){
 
 
 func (rsm *RsManager) patchResult(key int,result []byte){
+
+	log.Println("answer:",string(result))
+
 	if len(result) < 1 { return } 
 	
 	head :=  string(result[0:1])

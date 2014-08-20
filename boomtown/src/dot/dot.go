@@ -2,6 +2,7 @@ package dot
 
 import (
 	//"log"	
+	"strings"
 )
 
 
@@ -30,6 +31,21 @@ func CreateDot(str string)*Dot {
 	} else { return dot }
 	
 }
+
+func (n *Dot) Attach(c *Dot) {
+
+	r := n.GetKChild(c.GetValue()) 	
+	if  r == nil {
+		n.AppendChild(c) 
+	} else {
+		for _,child := range(c.child) {
+			r.Attach(child) 
+		}		
+	}
+	
+}
+
+
 
 
 func (n *Dot) add(c *Dot) {
@@ -85,10 +101,23 @@ func (dot *Dot) str() string{
 
 }
 
-func (dot *Dot) GetChild(i int) *Dot{
+func (dot *Dot) GetNChild(i int) *Dot{
 	
 	if i < len(dot.child) { return dot.child[i]
 	} else { return nil }  
+}
+
+func (dot *Dot) GetChild(path string) *Dot{
+	
+	arr := strings.Split(path,".")
+	
+	cur := dot
+	for _,p := range(arr) {
+		cur = cur.GetKChild(p)
+		if cur == nil { return nil }		
+	}
+	
+	return cur
 }
 
 
@@ -118,7 +147,7 @@ func (dot *Dot) GetCValue() string {
 	차후에 하위 노드중 터미널 노드 의 값을 종합해서 리턴하는 것으로 업그레이드예정  
 */
 
-	c := dot.GetChild(0)
+	c := dot.GetNChild(0)
 	
 	if c != nil { return c.GetValue() 
 	} else { return  "" }

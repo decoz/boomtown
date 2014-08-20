@@ -57,7 +57,7 @@ function BoomSocket(wsUrl) {
 
 BoomSocket.prototype.selectHandler = function(msg){	
 	var arr = msg.split(":")
-    	writeToScreen('log: cmd - [' + arr[0] + ']')
+    	this.writeToScreen('log: cmd - [' + arr[0] + ']')
     	if(this.msg_handler[arr[0]] != undefined){
 
        		var handler = this.msg_handler[arr[0]]
@@ -69,7 +69,7 @@ BoomSocket.prototype.selectHandler = function(msg){
 }
 
 BoomSocket.prototype.doSend = function(message) {
-	if(message.length > 100)  writeToScreen("SENT: " + message.length + " byte" );
+	if(message.length > 100)  this.writeToScreen("SENT: " + message.length + " byte" );
 	else writeToScreen("SENT-: " + message);  
 	this.ws.send(message); 
 }
